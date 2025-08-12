@@ -1,0 +1,98 @@
+<!-- filepath: chaos_app/templates/chaos_app/index.html -->
+{% extends "base.html" %}
+
+{% load static %}
+
+    {% block content %}
+    
+    <!-- Different homepages are displayed depending on whether the user is authenticated-->
+
+    <!-- If user authenticated display basic hero message and option to play card game -->
+    {% if user.is_authenticated %}
+    <div class="container d-flex flex-column flex-md-row align-items-center my-auto">
+
+        <header id="header" class="container text-center me-md-2 mb-4 d-flex flex-column justify-content-center">
+            <h1 class="display-1">Chaos Cards</h1>
+            <p class="lead mt-2">It's simple: Hit spin and discover what fate will bring.</p>
+        </header>
+
+        <section id="card-container" class="container text-center d-flex justify-content-center ms-md-2 mb-4">
+            <div id="container">
+            <!-- Check first if spin has been pressed to determine what to display-->
+            {% if spin_attempted %}
+                {% if random_card %}
+                    <!-- If user pressed spin AND user has created cards, display random card -->
+                <div id="demo-card" class="card card-home mx-auto">
+                    {% if 'placeholder' in random_card.featured_image.url %}
+                    <img src="{% static 'images/default-image.webp' %}" alt="Default image">
+                    {% else %}
+                    <!-- Hardcoded slicing into url path to ensure links are https secured -->
+                    <img src="https://{{ random_card.featured_image.url|slice:"7:" }}" alt="{{ random_card.title }}">
+                    {% endif %}
+                    <div class="card-body">
+                        <h2 class="card-title">{{ random_card.title }}</h2>
+                        <p class="card-text mt-2">{{ random_card.content }}</p>
+                    </div>
+                </div>
+                {% else %}
+                    <!-- If user has pressed spin BUT hasn't created cards, display no card message and signpost to card creation -->
+                <div class="alert alert-warning text-center mt-4">
+                    <p>You have no cards yet. Create your own cards to spin the wheel of chaos!</p>
+                </div>
+                {% endif %}
+            {% else %}
+                    <!-- If user has not pressed spin (i.e. have just loaded home page) display the demo card with the spin button -->
+                <div id="demo-card" class="card card-home mx-auto">
+                    <img src="{% static 'images/default-image.webp' %}" alt="Cartoon image of a roulette wheel.">
+                    <div class="card-body">
+                        <h2 class="card-title">Demo</h2>
+                        <p class="card-text mt-2">Invitation unknown...</p>
+                    </div>
+                </div>
+            {% endif %}
+            <!-- Spin or Create Card Button -->
+            <!--Determine which button to display depending on whether user has cards-->
+            {% if spin_attempted and not random_card %}
+                <form method="get" action="{% url 'user_cards' %}">
+                    <button type="submit" class="btn btn-success mt-4">Create Cards</button>
+                </form>
+            {% else %}
+                <form method="get" action="{% url 'spin_card' %}">
+                    <button type="submit" class="btn btn-outline-secondary mt-2">Spin</button>
+                </form>
+            {% endif %}
+            </div>
+        </section>
+    </div>
+    {% else %}
+
+
+    <!-- If user is not authenticated welcome them to the page, brief description and option to register or log-in -->
+
+    <header class="container text-center mb-4 d-flex flex-column justify-content-center">
+        <div class="row">
+            <h1 class="display-1 mb-4">Welcome to | <span class="orange-title">Chaos Cards</span></h1>
+            <div class="yellow-background col-md-8 offset-md-2">
+            <!-- Welcome message and brief description of the app -->
+                <p class="lead large">It's simple: Hit spin and discover what fate will bring.</p>
+                <p class="lead">This experiment is for those feeling tired of the daily slog. For those wanting to cede control to the forces of chaos, just a little.</p>
+                <p class="lead bold">Register or sign in to create your own cards and play the game.</p>
+            </div>
+        </div>
+        <div class="container mt-4 d-flex justify-content-center">
+            <div class="col-md-4">
+                <div class="row">
+                    <div class="col-md-6">
+                        <a class="btn mt-3 home-btn btn-register" href="{% url 'account_signup' %}">Register</a>
+                    </div>
+                    <div class="col-md-6">
+                        <a class="btn mt-3 home-btn btn-login" href="{% url 'account_login' %}">Log In</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    {% endif %}
+    {% endblock %}
+
+</html>

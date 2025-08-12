@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block content %}
+
+<div class="mt-4 mb-5">
+<h1 class="text-center display-1">My Cards</h1>
+<hr class="one">
+</div>
+
+<div class="container" id="user-cards">
+    <div class="row">
+        <div class="col-md-6 col-lg-8">
+            <div class="row">
+                {% for card in cards %}
+                <div class="col-lg-6 card-mb">
+                    <div class="card mx-auto">
+                        {% if 'placeholder' in card.featured_image.url %}
+                        <img src="{% static 'images/default-image.webp' %}" alt="Cartoon image of a roulette wheel." class="card-img-top" id="card-image{{card.id}}">
+                        {% else %}
+                        <!--Ensure the image url is secure through hardcoding - remove the http:// and replace with https://-->
+                        <img src="https://{{ card.featured_image.url|slice:'7:' }}" alt="{{ card.title }}" class="card-img-top" id="card-image{{card.id}}">
+                        {% endif %}
+                        <div class="card-body">
+                            <h2 class="card-title" id="card-title{{card.id}}">{{ card.title }}</h2>
+                            <p class="card-text mt-2" id="card-content{{card.id}}">{{ card.content }}</p>
+                            <p> {{ card.created_on|date:"F j, Y" }}</p>
+                        </div>
+                    </div>
+                    <!-- Edit and delete buttons-->
+                    <div class="text-center mt-2">
+                        <button class="btn edit-btn" data-card-id="{{ card.id }}">Edit</button>
+                        <button class="btn delete-btn" data-card-id="{{ card.id }}">Delete</button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        <!-- Creating and editing cards form -->
+        <div class="col-md-6 col-lg-4">
+            <div id="form-body" class="card-body">
+                <h2 id="form-title">Create a Card</h2>
+                <p class="lead">Posting as: {{ user.username }}</p>
+                <form id="card-form" method="post" enctype="multipart/form-data">
+                    {{ form | crispy }}
+                    {% csrf_token %}
+                    <button type="submit" class="btn" id="submit-btn">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+    {% if is_paginated %}
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center mt-4">
+            {% if page_obj.has_previous %}
+            <li><a href="?page={{ page_obj.previous_page_number}}" class="btn btn-warning">&laquo; PREV</a></li>
+            {% endif %}
+            {% if page_obj.has_next %}
+            <li><a href="?page={{ page_obj.next_page_number }}" class="btn btn-warning"> NEXT &raquo;</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+
+<!-- Delete confirmation modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1"
+aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"
+                id="deleteModalLabel">Delete card?</h5>
+                <button type="button" class="btn-close"
+                data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete your card?
+                This action cannot be undone.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary"
+                data-bs-dismiss="modal">Close</button>
+                <a id="deleteConfirm" href="" class="btn
+                btn-danger">Delete</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extras %}
+<script src="{% static 'js/edit_card.js' %}"></script>
+{% endblock %}
