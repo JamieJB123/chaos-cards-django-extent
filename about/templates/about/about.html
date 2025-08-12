@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block content %}
+
+<div class="container mb-4">
+    <h1 class="display-1 text-center">Chaos Cards</h1>
+</div>
+
+<!-- About Section -->
+<div class="container">
+    <div class="row">
+        <div class="col-md-4 mb-4 d-flex justify-content-center align-self-start">
+            {% if 'placeholder' in about.profile_image.url %}
+            <img src="{% static 'images/randomness.webp' %}" class="img-fluid mt-2" alt="Randomness Image">
+            {%else %}
+            <!-- Hardcoded url slicing to ensure that url links are https secure -->
+            <img src="https://{{ about.profile_image.url|slice:'7:' }}" class="img-fluid mt-2" alt="Randomness Image">
+            {% endif %}
+        </div>
+        <div class="col-md-8 about-content">
+            <h1>{{about.title}}</h1>
+            <hr>
+            {{about.content | safe }}
+            <p>Last updated on: {{about.updated_on|date:"F j, Y"}}</p>
+        </div>
+    </div>
+</div>
+<!-- Contact / Feedback Form -->
+<div class="container mt-5">
+    <div class="row d-flex justify-content-center">
+        <div class="col-md-6 feedback-form">
+            <h2>Get in Touch</h2>
+            <p>If you want to get in touch, if you have any feedback or suggestions, or if you would like to collaborate, please fill out the form below and we'll get back to you as soon as we can:</p>
+            <form method="post" action={% url 'about' %}>
+                {% csrf_token %}
+                {{ form | crispy }}
+                <button type="submit" class="btn btn-about">Submit</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
